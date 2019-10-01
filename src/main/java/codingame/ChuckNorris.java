@@ -10,15 +10,12 @@ public class ChuckNorris {
 	public static void main(String args[]) {
 		Scanner in = new Scanner(System.in);
 		String message = in.nextLine();
-		System.err.println(message);
 
 		String binaryMessage = message.chars()
 				.boxed()
 				.map(Integer::toBinaryString)
 				.map(ChuckNorris::getWithPadding)
 				.collect(Collectors.joining());
-
-		System.err.println(binaryMessage);
 
 		StringBuilder output = new StringBuilder();
 		for (int i = 0; i < binaryMessage.length(); i++) {
@@ -42,7 +39,7 @@ public class ChuckNorris {
 	private static String getWithPadding(String binaryChar) {
 		if (binaryChar.length() < 7) {
 			binaryChar =
-					IntStream.generate(() -> 0).limit(7 - binaryChar.length()).mapToObj(String::valueOf).collect(Collectors.joining())
+					IntStream.generate(() -> 0).limit(7L - binaryChar.length()).mapToObj(String::valueOf).collect(Collectors.joining())
 							+ binaryChar;
 		}
 		return binaryChar;
