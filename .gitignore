@@ -1,2 +1,5 @@
 # Project exclude paths
 /target/
+/.idea/*
+/sandbox.iml
+/src/main/java/Solution.java
