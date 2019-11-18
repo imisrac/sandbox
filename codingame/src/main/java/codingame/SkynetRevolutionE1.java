@@ -8,76 +8,89 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 
-@Getter
 class SkynetRevolutionE1 {
 
-	//	private List<List<Integer>> links = new ArrayList<>();
-	private Set<Integer> exitGWs = new HashSet<>();
 	private List<Node> nodes;
+	private List<Integer> exitGWs = new ArrayList<>();
 
 	SkynetRevolutionE1(int numberOfNodes) {
-		//		IntStream.rangeClosed(1, numberOfNodes)
-		//				.forEach(value -> links.add(new ArrayList<>()));
-		nodes = new ArrayList<>(numberOfNodes);
+		nodes = IntStream.rangeClosed(0, numberOfNodes - 1)
+				.boxed()
+				.map(Node::new)
+				.collect(Collectors.toList());
 	}
 
 	void addLink(int node1, int node2) {
-		//		links.get(node1).add(node2);
-		//		links.get(node2).add(node1);
-		final Node node = new Node(node1);
-		final Node other = new Node(node2);
-		node.connect(other);
-		nodes.add(node);
-		nodes.add(other);
+		nodes.get(node1).addLinkTo(nodes.get(node2));
+		nodes.get(node2).addLinkTo(nodes.get(node1));
 	}
 
-	void addExitGW(int node) {
-		exitGWs.add(node);
+	void addExitGW(int exitGW) {
+		exitGWs.add(exitGW);
 	}
 
-	String attack(Integer agentPosition) {
-		//		links.get(agentPosition).remove(targetNode);
-		//		links.get(targetNode).remove(agentPosition);
-		return agentPosition + " " + search(nodes.get(agentPosition)).getValue();
-	}
-
-	private Node search(Node start) {
+	String attack(int agentPosition) {
 		Queue<Node> queue = new ArrayDeque<>();
-		queue.add(start);
-		List<Node> alreadyVisited = new ArrayList<>();
+		queue.add(getNodeForValue(agentPosition));
 		Node currentNode;
+		Set<Node> alreadyVisited = new HashSet<>();
 
 		while (!queue.isEmpty()) {
 			currentNode = queue.remove();
-
-			if (exitGWs.contains(currentNode.getValue())) {
-				return alreadyVisited.get(0);
+			if (hasALinkToAnyGW(currentNode)) {
+				final Node closestExitGW = getExitGWFromNodes(currentNode.getLinks());
+				currentNode.getLinks().remove(closestExitGW);
+				return currentNode.getValue() + " " + closestExitGW.getValue();
 			} else {
 				alreadyVisited.add(currentNode);
-				queue.addAll(currentNode.getNeighbors());
+				queue.addAll(currentNode.getLinks());
 				queue.removeAll(alreadyVisited);
 			}
 		}
+		return "-1 -1";
+	}
 
-		return new Node(0);
+	private boolean hasALinkToAnyGW(Node node) {
+		return node.getLinks().stream()
+				.map(Node::getValue)
+				.anyMatch(this::isExitGW);
+	}
+
+	private Node getNodeForValue(int value) {
+		return nodes.stream()
+				.filter(node -> value == node.getValue())
+				.findAny()
+				.orElseThrow(() -> new IndexOutOfBoundsException("No Node found with value: " + value));
+	}
+
+	private Node getExitGWFromNodes(List<Node> nodes) {
+		return nodes.stream()
+				.filter(node -> isExitGW(node.getValue()))
+				.findFirst()
+				.orElseThrow(() -> new RuntimeException("No exit gateway found within nodes: " + nodes));
+	}
+
+	private boolean isExitGW(Integer nodeValue) {
+		return exitGWs.stream()
+				.anyMatch(nodeValue::equals);
 	}
 
 	@Getter
-	private class Node {
+	private static class Node {
 
 		private final int value;
-		private Set<Node> neighbors;
+		private List<Node> links = new ArrayList<>();
 
-		private Node(int value) {
+		Node(int value) {
 			this.value = value;
-			neighbors = new HashSet<>();
 		}
 
-		void connect(Node other) {
-			this.neighbors.add(other);
-			other.neighbors.add(this);
+		void addLinkTo(Node other) {
+			links.add(other);
 		}
 	}
 }
