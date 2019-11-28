@@ -1,6 +1,5 @@
 package codingame;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -8,12 +7,11 @@ import static org.junit.Assert.assertEquals;
 
 public class MarsLanderTest {
 
-	private static final float GRAVITY = 3.71F;
-	private MarsLander marsLander = new MarsLander();
+	private MarsLander marsLander = new MarsLander(3.71F);
 
 	@Test
 	public void land_level_1() {
-		marsLander.land(1, 1, GRAVITY);
+		marsLander.land(1, 1);
 
 		assertEquals(0, marsLander.getPower());
 		assertEquals(-4, getRoundedVspeed());
@@ -21,7 +19,7 @@ public class MarsLanderTest {
 
 	@Test
 	public void land_level_10() {
-		marsLander.land(1, 10, GRAVITY);
+		marsLander.land(1, 10);
 
 		assertEquals(0, marsLander.getPower());
 		assertEquals(-37, getRoundedVspeed());
@@ -29,16 +27,15 @@ public class MarsLanderTest {
 
 	@Test
 	public void land_level_11() {
-		marsLander.land(1, 11, GRAVITY);
+		marsLander.land(1, 11);
 
 		assertEquals(1, marsLander.getPower());
 		assertEquals(-40, getRoundedVspeed());
 	}
 
-	@Ignore
 	@Test
 	public void crash_level_12() {
-		marsLander.land(5, 12, GRAVITY);
+		marsLander.land(5, 12);
 
 		assertEquals(2, marsLander.getPower());
 		assertEquals(-40, getRoundedVspeed());
@@ -46,7 +43,7 @@ public class MarsLanderTest {
 
 	@Test
 	public void land_level_38() {
-		marsLander.land(104, 38, GRAVITY);
+		marsLander.land(104, 38);
 
 		assertEquals(4, marsLander.getPower());
 		assertEquals(-40, getRoundedVspeed());

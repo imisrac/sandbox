@@ -14,11 +14,16 @@ class MarsLander {
 	private static final int MAX_POWER = 4;
 	private float vSpeed = 0;
 	private int power = 0;
+	private final float gravity;
 
-	void land(int fuel, int height, float gravity) {
+	MarsLander(float gravity) {
+		this.gravity = gravity;
+	}
+
+	void land(int fuel, int height) {
 		while (height > 0) {
 			if (fuel > 0) {
-				if (Math.round(vSpeed - gravity + power) < MIN_VSPEED) {
+				if (vSpeed - gravity + power < MIN_VSPEED) {
 					increasePower(fuel);
 				} else {
 					decreasePower(fuel);
