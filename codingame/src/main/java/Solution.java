@@ -1,9 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
 
 /**
  * Auto-generated code below aims at helping you parse
@@ -11,34 +6,44 @@ import java.util.stream.IntStream;
  **/
 class Player {
 
+	private static final int MIN_VSPEED = -40;
+	private static final int MAX_POWER = 4;
+
 	public static void main(String args[]) {
 		Scanner in = new Scanner(System.in);
-		int numberOfNodes = in.nextInt(); // the total number of nodes in the level, including the gateways
-		int numberOfLinks = in.nextInt(); // the number of links
-		int numberOfExitGateways = in.nextInt(); // the number of exit gateways
-		List<List<Integer>> links = new ArrayList<>();
-		List<Integer> exitGWs;
-
-		IntStream.rangeClosed(1, numberOfLinks)
-				.forEach(value -> links.add(new ArrayList<>()));
-
-		for (int i = 0; i < numberOfLinks; i++) {
-			int node1 = in.nextInt();
-			int node2 = in.nextInt();
-			if (links.size() <= node1 || links.get(node1) == null) {
-				links.add(node1, new ArrayList<>());
-			}
-			links.get(node1).add(node2);
+		int surfaceN = in.nextInt(); // the number of points used to draw the surface of Mars.
+		for (int i = 0; i < surfaceN; i++) {
+			int landX = in.nextInt(); // X coordinate of a surface point. (0 to 6999)
+			int landY = in
+					.nextInt(); // Y coordinate of a surface point. By linking all the points together in a sequential fashion, you form the surface of Mars.
 		}
-		exitGWs = IntStream.rangeClosed(1, numberOfExitGateways)
-				.mapToObj(operand -> in.nextInt())
-				.collect(Collectors.toList());
 
 		// game loop
 		while (true) {
-			Integer skynetAgentIndex = in.nextInt(); // The index of the node on which the Skynet agent is positioned this turn
+			int X = in.nextInt();
+			int Y = in.nextInt();
+			int hSpeed = in.nextInt(); // the horizontal speed (in m/s), can be negative.
+			int vSpeed = in.nextInt(); // the vertical speed (in m/s), can be negative.
+			int fuel = in.nextInt(); // the quantity of remaining fuel in liters.
+			int rotate = in.nextInt(); // the rotation angle in degrees (-90 to 90).
+			int power = in.nextInt(); // the thrust power (0 to 4).
 
-			System.out.println(skynetAgentIndex + " " + links.get(skynetAgentIndex).get(0));
+			if (fuel > 0) {
+				if (vSpeed < MIN_VSPEED) {
+					if (power < MAX_POWER) {
+						power++;
+					}
+				} else
+					if (vSpeed > MIN_VSPEED) {
+						if (power > 0) {
+							power--;
+						}
+					}
+			} else {
+				power = 0;
+			}
+
+			System.out.println("0 " + power);
 		}
 	}
 }

@@ -1,49 +1,58 @@
 package codingame;
 
-import java.util.Scanner;
+import lombok.Getter;
+import lombok.extern.java.Log;
+
+import java.util.logging.Level;
 
 
-public class MarsLander {
+@Getter
+@Log
+class MarsLander {
 
-	/**
-	 * Auto-generated code below aims at helping you parse
-	 * the standard input according to the problem statement.
-	 **/
-	public static final int MAX_POWER = 4;
-	public static final int VSPEED_THRESHOLD = -40;
-	public static final int MIN_POWER = 0;
+	private static final int MIN_VSPEED = -40;
+	private static final int MAX_POWER = 4;
+	private float vSpeed = 0;
+	private int power = 0;
 
-	public static void main(String args[]) {
-		Scanner in = new Scanner(System.in);
-		int surfaceN = in.nextInt(); // the number of points used to draw the surface of Mars.
-		for (int i = 0; i < surfaceN; i++) {
-			int landX = in.nextInt(); // X coordinate of a surface point. (0 to 6999)
-			int landY = in
-					.nextInt(); // Y coordinate of a surface point. By linking all the points together in a sequential fashion, you form the surface of Mars.
+	void land(int fuel, int height, float gravity) {
+		while (height > 0) {
+			if (fuel > 0) {
+				if (Math.round(vSpeed - gravity + power) < MIN_VSPEED) {
+					increasePower(fuel);
+				} else {
+					decreasePower(fuel);
+				}
+			} else {
+				power = 0;
+				log.log(Level.WARNING, "Fuel tank empty.");
+			}
+			vSpeed += power - gravity;
+			fuel -= power;
+			height--;
 		}
+		if (vSpeed < MIN_VSPEED) {
+			log.log(Level.SEVERE, "Marslander chrashed.");
+		}
+	}
 
-		int nextPower = 3;
-		// game loop
-		while (true) {
-			int X = in.nextInt();
-			int Y = in.nextInt();
-			int hSpeed = in.nextInt(); // the horizontal speed (in m/s), can be negative.
-			int vSpeed = in.nextInt(); // the vertical speed (in m/s), can be negative.
-			int fuel = in.nextInt(); // the quantity of remaining fuel in liters.
-			int rotate = in.nextInt(); // the rotation angle in degrees (-90 to 90).
-			int power = in.nextInt(); // the thrust power (0 to 4).
-
-			// Write an action using System.out.println()
-			// To debug: System.err.println("Debug messages...");
-			if (nextPower < MAX_POWER && vSpeed < VSPEED_THRESHOLD) {
-				nextPower++;
+	private void decreasePower(int fuel) {
+		if (power > 0) {
+			if (fuel >= power - 1) {
+				power--;
+			} else {
+				power = fuel;
 			}
-			if (nextPower > MIN_POWER && vSpeed > 0) {
-				nextPower--;
-			}
+		}
+	}
 
-			// 2 integers: rotate power. rotate is the desired rotation angle (should be 0 for level 1), power is the desired thrust power (0 to 4).
-			System.out.println("0 " + nextPower);
+	private void increasePower(int fuel) {
+		if (power < MAX_POWER) {
+			if (fuel > power) {
+				power++;
+			} else {
+				log.log(Level.WARNING, "Not enough fuel to increase power.");
+			}
 		}
 	}
 }
