@@ -1,6 +1,7 @@
 package bowling;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -14,6 +15,6 @@ public class Game {
 
 	public int score() {
 
-		//		return Arrays.stream(rolls).reduce(Integer::sum).orElse(0);
+				return rolls.stream().reduce(Integer::sum).orElse(0);
 	}
 }

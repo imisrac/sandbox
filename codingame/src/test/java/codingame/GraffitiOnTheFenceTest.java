@@ -1,35 +1,82 @@
+package codingame;
+
+import lombok.Value;
+import org.junit.Test;
+
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-/**
- * Auto-generated code below aims at helping you parse
- * the standard input according to the problem statement.
- **/
-class Solution {
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertTrue;
 
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        int L = in.nextInt();
-        PaintedWall paintedWall = new PaintedWall(L);
-        int N = in.nextInt();
-        for (int i = 0; i < N; i++) {
-            int st = in.nextInt();
-            int ed = in.nextInt();
-            paintedWall.reportInterval(new Interval(st, ed));
-        }
+public class GraffitiOnTheFenceTest {
 
-        System.out.println(getMissingIntervalsAsString(paintedWall));
+    private PaintedWall paintedWall;
+
+    @Test
+    public void one_wall_without_painting() {
+        initWall(1);
+
+        assertThat(getUnPaintedIntervals(), containsInAnyOrder(new Interval(0, 1)));
     }
 
-    private static String getMissingIntervalsAsString(PaintedWall paintedWall) {
-        Set<Interval> missingIntervals = paintedWall.getUnPaintedIntervals();
-        if (missingIntervals.isEmpty()) {
-            return "All painted";
-        }
-        return missingIntervals.stream()
-                .map(Interval::toString)
-                .collect(Collectors.joining("\n"));
+    private Set<Interval> getUnPaintedIntervals() {
+        return paintedWall.getUnPaintedIntervals();
+    }
+
+    private void initWall(int i) {
+        paintedWall = new PaintedWall(i);
+    }
+
+    @Test
+    public void one_wall_full_painted() {
+        initWall(1);
+
+        paintedWall.reportInterval(new Interval(0, 1));
+
+        assertTrue(paintedWall.getUnPaintedIntervals().isEmpty());
+    }
+
+    @Test
+    public void missing_end() {
+        initWall(2);
+
+        paintedWall.reportInterval(new Interval(0, 1));
+
+        assertThat(getUnPaintedIntervals(), containsInAnyOrder(new Interval(1, 2)));
+    }
+
+    @Test
+    public void middle_missing() {
+        initWall(3);
+
+        paintedWall.reportInterval(new Interval(0, 1));
+        paintedWall.reportInterval(new Interval(2, 3));
+
+        assertThat(getUnPaintedIntervals(), containsInAnyOrder(new Interval(1, 2)));
+    }
+
+    @Test
+    public void interval_cover() {
+        initWall(10);
+
+        paintedWall.reportInterval(new Interval(1, 4));
+        paintedWall.reportInterval(new Interval(2, 3));
+
+        assertThat(getUnPaintedIntervals(), containsInAnyOrder(Arrays.asList(new Interval(0, 1), new Interval(4, 10)).toArray()));
+    }
+
+    @Test
+    public void cover_two() {
+        initWall(10);
+
+        paintedWall.reportInterval(new Interval(6, 7));
+        paintedWall.reportInterval(new Interval(2, 5));
+        paintedWall.reportInterval(new Interval(1, 6));
+
+        assertThat(getUnPaintedIntervals(), containsInAnyOrder(Arrays.asList(new Interval(0, 1), new Interval(7, 10)).toArray()));
     }
 
     private static class PaintedWall {
@@ -100,49 +147,18 @@ class Solution {
         }
     }
 
+    @Value
     private static class Interval implements Comparable<Interval> {
         int start;
         int end;
-
-        public Interval(int start, int end) {
-            this.start = start;
-            this.end = end;
-        }
-
-        public int getStart() {
-            return start;
-        }
-
-        public int getEnd() {
-            return end;
-        }
 
         public int length() {
             return end - start;
         }
 
         @Override
-        public String toString() {
-            return start + " " + end;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Interval interval = (Interval) o;
-            return start == interval.start &&
-                    end == interval.end;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(start, end);
-        }
-
-        @Override
         public int compareTo(Interval interval) {
-            return start-interval.getStart();
+            return start - interval.getStart();
         }
     }
 }
