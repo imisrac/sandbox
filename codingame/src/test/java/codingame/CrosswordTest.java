@@ -1,10 +1,10 @@
 package codingame;
 
 import lombok.AllArgsConstructor;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class CrosswordTest {
 

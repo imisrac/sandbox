@@ -1,15 +1,14 @@
 package codingame;
 
 import com.google.common.collect.ImmutableMap;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 
 public class MarsLander2Test {
@@ -28,7 +27,7 @@ public class MarsLander2Test {
 		assertThat(marsLander2.getEndOfFlatGround(), is(3500));
 	}
 
-	@Test(expected = IndexOutOfBoundsException.class)
+	@Test
 	public void init_single_error() {
 		marsLander2 = new MarsLander2(ImmutableMap.of(1, 2));
 	}

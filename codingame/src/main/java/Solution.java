@@ -1,148 +1,114 @@
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 /**
  * Auto-generated code below aims at helping you parse
  * the standard input according to the problem statement.
  **/
-class Solution {
+class Player {
 
-    public static void main(String[] args) {
+    public static void main(String args[]) {
         Scanner in = new Scanner(System.in);
-        int L = in.nextInt();
-        PaintedWall paintedWall = new PaintedWall(L);
-        int N = in.nextInt();
-        for (int i = 0; i < N; i++) {
-            int st = in.nextInt();
-            int ed = in.nextInt();
-            paintedWall.reportInterval(new Interval(st, ed));
-        }
 
-        System.out.println(getMissingIntervalsAsString(paintedWall));
-    }
-
-    private static String getMissingIntervalsAsString(PaintedWall paintedWall) {
-        Set<Interval> missingIntervals = paintedWall.getUnPaintedIntervals();
-        if (missingIntervals.isEmpty()) {
-            return "All painted";
-        }
-        return missingIntervals.stream()
-                .map(Interval::toString)
-                .collect(Collectors.joining("\n"));
-    }
-
-    private static class PaintedWall {
-        private int length;
-        private Set<Interval> paintedIntervals = new TreeSet<>();
-
-        public PaintedWall(int length) {
-            this.length = length;
-        }
-
-        public Set<Interval> getUnPaintedIntervals() {
-            if (paintedIntervals.isEmpty()) {
-                return Collections.singleton(new Interval(0, length));
+        // game loop
+        while (true) {
+            int myShipCount = in.nextInt(); // the number of remaining ships
+            int entityCount = in.nextInt(); // the number of entities (e.g. ships, mines or cannonballs)
+            List<Entity> entities = new ArrayList<>();
+            for (int i = 0; i < entityCount; i++) {
+                Entity e = new Entity(in.nextInt(), EntityTypeEnum.valueOf(in.next())).withX(in.nextInt()).withY(in.nextInt()).withArgs(in.nextInt(), in.nextInt(), in.nextInt(), in.nextInt());
+                entities.add(e);
             }
-
-            Set<Interval> missingIntervals = getMissingIntervals(getUncoveredIntervals(paintedIntervals));
-
-            missingIntervals.add(new Interval(0, getStartOfFirstInterval(paintedIntervals)));
-            missingIntervals.add(new Interval(getEndOfLastInterval(paintedIntervals), length));
-
-            return getValidIntervals(missingIntervals);
-        }
-
-        private Set<Interval> getValidIntervals(Set<Interval> intervals) {
-            return intervals.stream()
-                    .filter(interval -> interval.length() > 0)
-                    .collect(Collectors.toSet());
-        }
-
-        private List<Interval> getUncoveredIntervals(Set<Interval> intervals) {
-            return intervals.stream()
-                    .filter(interval -> !isAlreadyCovered(interval, intervals))
-                    .sorted(Interval::compareTo)
-                    .collect(Collectors.toList());
-        }
-
-        private Set<Interval> getMissingIntervals(List<Interval> intervals) {
-            return IntStream.rangeClosed(0, intervals.size() - 2)
-                    .boxed()
-                    .filter(integer -> intervals.get(integer).getEnd() < intervals.get(integer + 1).getStart())
-                    .map(integer -> new Interval(intervals.get(integer).getEnd(), intervals.get(integer + 1).getStart()))
-                    .collect(Collectors.toSet());
-        }
-
-        private int getEndOfLastInterval(Set<Interval> intervals) {
-            return intervals.stream()
-                    .mapToInt(Interval::getEnd)
-                    .max()
-                    .orElse(length);
-        }
-
-        private int getStartOfFirstInterval(Set<Interval> intervals) {
-            return intervals.stream()
-                    .mapToInt(Interval::getStart)
-                    .min()
-                    .orElse(0);
-        }
-
-        public void reportInterval(Interval interval) {
-            paintedIntervals.add(interval);
-        }
-
-        private boolean isAlreadyCovered(Interval interval, Set<Interval> intervals) {
-            return intervals.stream()
-                    .filter(interval1 -> !interval.equals(interval1))
-                    .filter(painted -> interval.getStart() >= painted.getStart())
-                    .anyMatch(painted -> interval.getEnd() <= painted.getEnd());
+            for (int i = 0; i < myShipCount; i++) {
+                String action;
+                Optional<Entity> optionalEntity = entities.stream()
+                        .filter(entity1 -> EntityTypeEnum.BARREL.equals(entity1.getType()))
+                        .max(Comparator.comparing(Entity::getArg1));
+                if (optionalEntity.isPresent()) {
+                    Entity entity = optionalEntity
+                            .get();
+                    action = ShipActionEnum.MOVE.getValue() + " " + entity.getX() + " " + entity.getY();
+                } else {
+                    action = ShipActionEnum.SLOWER.getValue();
+                }
+                System.out.println(action); // Any valid action, such as "WAIT" or "MOVE x y"
+            }
         }
     }
 
-    private static class Interval implements Comparable<Interval> {
-        int start;
-        int end;
+    public enum ShipActionEnum {
+        SLOWER("SLOWER"),
+        MOVE("MOVE"),
+        WAIT("WAIT"),
+        FIRE("FIRE");
+        private final String value;
 
-        public Interval(int start, int end) {
-            this.start = start;
-            this.end = end;
+        public String getValue() {
+            return value;
         }
 
-        public int getStart() {
-            return start;
+        ShipActionEnum(String value) {
+            this.value = value;
+        }
+    }
+
+    public enum EntityTypeEnum {
+        SHIP(),
+        BARREL(),
+        MINE(),
+        CANNONBALL;
+
+        EntityTypeEnum() {
+        }
+    }
+
+    private static class Entity {
+
+        private final int id;
+        private final EntityTypeEnum type;
+        private int X;
+        private int Y;
+        private int arg1;
+        private int arg2;
+        private int arg3;
+        private int arg4;
+
+        public Entity(int id, EntityTypeEnum type) {
+            this.id = id;
+            this.type = type;
         }
 
-        public int getEnd() {
-            return end;
+        public Entity withX(int X) {
+            this.X = X;
+            return this;
         }
 
-        public int length() {
-            return end - start;
+        public Entity withY(int Y) {
+            this.Y = Y;
+            return this;
         }
 
-        @Override
-        public String toString() {
-            return start + " " + end;
+        public Entity withArgs(int arg1, int arg2, int arg3, int arg4) {
+            this.arg1 = arg1;
+            this.arg2 = arg2;
+            this.arg3 = arg3;
+            this.arg4 = arg4;
+            return this;
         }
 
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Interval interval = (Interval) o;
-            return start == interval.start &&
-                    end == interval.end;
+        public EntityTypeEnum getType() {
+            return type;
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(start, end);
+        public int getX() {
+            return X;
         }
 
-        @Override
-        public int compareTo(Interval interval) {
-            return start-interval.getStart();
+        public int getY() {
+            return Y;
+        }
+
+        public int getArg1() {
+            return arg1;
         }
     }
 }
